@@ -8,7 +8,6 @@ import {
   isBinanceWeb3WalletInstalled,
   isBraveWalletInstalled,
   isCoin98Installed,
-  isCyberWalletInstalled,
   isMathWalletInstalled,
   isMetamaskInstalled,
   isOkxWalletInstalled,
@@ -44,8 +43,12 @@ export const getWalletsConfig = ({
   createEvmQrCode?: () => () => Promise<string>
   solanaWalletAdapters: SolanaWalletAdapter[]
 }): WalletConfigV3[] => {
-  const qrCode = createEvmQrCode ? createEvmQrCode() : undefined
-  console.log('debug sol wallets', solanaWalletAdapters)
+  const qrCode = createEvmQrCode?.()
+  try {
+    console.log('debug sol wallets', solanaWalletAdapters)
+  } catch (err) {
+    console.warn('Failed to log solanaWalletAdapters:', err)
+  }
   const isSolanaWalletInstalled = (walletName: WalletName) => {
     if (!solanaWalletAdapters || solanaWalletAdapters.length === 0) return false
     return solanaWalletAdapters.some(
