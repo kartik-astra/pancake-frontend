@@ -1,23 +1,26 @@
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
 import { NextPageWithLayout } from 'utils/page.types'
 import { CHAIN_IDS } from 'utils/wagmi'
 import { LiquidityView } from 'views/Liquidity/LiquidityView'
 import { PageWithoutFAQ } from 'views/Page'
 
+const isNumberReg = /^\d+$/
+
 const PoolPage = () => {
   const router = useRouter()
   const { tokenId } = router.query
 
-  useEffect(() => {
-    const isNumberReg = /^\d+$/
+  if (!router.isReady) {
+    return null
+  }
 
-    if (tokenId && typeof tokenId === 'string' && !tokenId.match(isNumberReg)) {
+  const isValid = typeof tokenId === 'string' && isNumberReg.test(tokenId)
+
+  if (!isValid) {
+    if (typeof window !== 'undefined') {
       router.replace('/add')
     }
-  }, [tokenId, router])
-  if (!tokenId) {
     return null
   }
 
