@@ -1,35 +1,14 @@
-import { FC, PropsWithChildren, useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { initialize } from '@solflare-wallet/wallet-adapter'
 
-import { type Adapter, type WalletError } from '@solana/wallet-adapter-base'
-import { ExodusWalletAdapter } from '@solana/wallet-adapter-exodus'
-import { GlowWalletAdapter } from '@solana/wallet-adapter-glow'
-import { ConnectionProvider, useWallet, WalletProvider } from '@solana/wallet-adapter-react'
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
-import {
-  BitgetWalletAdapter,
-  BitpieWalletAdapter,
-  Coin98WalletAdapter,
-  CoinbaseWalletAdapter,
-  MathWalletAdapter,
-  PhantomWalletAdapter,
-  SafePalWalletAdapter,
-  SolongWalletAdapter,
-  TokenPocketWalletAdapter,
-  TrustWalletAdapter,
-} from '@solana/wallet-adapter-wallets'
-import { initialize, SolflareWalletAdapter } from '@solflare-wallet/wallet-adapter'
-
-import { useAtomValue, useSetAtom } from 'jotai'
-import { rpcUrlAtom } from '@pancakeswap/utils/user'
-import { defaultNetWork } from './solana.config'
-import { BackpackWalletAdapter } from './walletAdapter/BackpackWalletAdapter'
-import { OKXWalletAdapter } from './walletAdapter/OKXWalletAdapter'
+import { useSetAtom } from 'jotai'
 import { accountActiveChainAtom } from './atoms/accountStateAtoms'
 
 initialize()
 
 export const SolanaWalletStateUpdater = () => {
-  const { connected, connecting, publicKey } = useWallet()
+  const { connected, connecting, publicKey, disconnect } = useWallet()
   const setWalletState = useSetAtom(accountActiveChainAtom)
 
   useEffect(() => {
@@ -38,6 +17,28 @@ export const SolanaWalletStateUpdater = () => {
       return { ...prev, solanaAccount }
     })
   }, [connected, connecting, publicKey, setWalletState])
+
+  useEffect(() => {
+    const handleAccountChange = async () => {
+      if (connected) {
+        try {
+          await disconnect()
+        } catch (err) {
+          console.error('Failed to disconnect Solana wallet:', err)
+        }
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('accountChange#pcs', handleAccountChange)
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('accountChange#pcs', handleAccountChange)
+      }
+    }
+  }, [connected, disconnect])
 
   return null
 }
