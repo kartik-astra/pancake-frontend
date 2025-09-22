@@ -19,7 +19,6 @@ import Page from '../Page'
 import { StyledSwapContainer } from '../Swap/styles'
 import { SwapFeaturesContext } from '../Swap/SwapFeaturesContext'
 import { InfinitySwapForm } from './InfinitySwap'
-import { chartDisplayAtom } from './InfinitySwap/atoms'
 
 const ChartWithPriceHeader = dynamic(() => import('components/Chart/ChartWithPriceHeader'), { ssr: false })
 
@@ -34,8 +33,7 @@ const InfinitySwapInner = () => {
   const { query } = useRouter()
   const { chainId } = useActiveChainId()
   const { isMobile, isDesktop } = useMatchBreakpoints()
-  const { isChartExpanded } = useContext(SwapFeaturesContext)
-  const [isChartDisplayed, setIsChartDisplayed] = useAtom(chartDisplayAtom)
+  const { isChartDisplayed, setIsChartDisplayed, isChartExpanded } = useContext(SwapFeaturesContext)
   const [isSwapHotTokenDisplay, setIsSwapHotTokenDisplay] = useSwapHotTokenDisplay()
   // const { t } = useTranslation()
   const [firstTime, setFirstTime] = useState(true)
@@ -57,7 +55,7 @@ const InfinitySwapInner = () => {
       setIsSwapHotTokenDisplay(true)
 
       if (!isSwapHotTokenDisplay && isChartDisplayed) {
-        setIsChartDisplayed((currentIsChartDisplayed) => !currentIsChartDisplayed)
+        setIsChartDisplayed?.((currentIsChartDisplayed) => !currentIsChartDisplayed)
       }
     }
   }, [firstTime, isChartDisplayed, isSwapHotTokenDisplay, query, setIsSwapHotTokenDisplay, setIsChartDisplayed])
@@ -96,7 +94,7 @@ const InfinitySwapInner = () => {
               />
             }
             isOpen={isChartDisplayed}
-            setIsOpen={(isOpen) => setIsChartDisplayed(isOpen)}
+            setIsOpen={(isOpen) => setIsChartDisplayed?.(isOpen)}
             hideCloseButton
           />
         )}
