@@ -11,7 +11,7 @@ const TwapAndLimitSwap = dynamic(() => import('views/Swap/Twap/TwapSwap'), { ssr
 
 const Layout: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
-    <Page showExternalLink={false} showHelpLink={false}>
+    <Page showExternalLink={false} showHelpLink={false} removePadding>
       {children}
     </Page>
   )
