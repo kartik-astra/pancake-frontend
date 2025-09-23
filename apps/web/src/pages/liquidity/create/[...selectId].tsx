@@ -10,7 +10,9 @@ import { CreateLiquidityV3Form } from 'views/CreateLiquidityPool/V3/CreateLiquid
 import PageLayout from 'components/Layout/Page'
 import { Box } from '@pancakeswap/uikit'
 import { CreateLiquidityV2Form } from 'views/CreateLiquidityPool/V2/CreateLiquidityV2Form'
+import { CreateStableSwapForm } from 'views/CreateLiquidityPool/StableSwap/CreateStableSwapForm'
 import styled from 'styled-components'
+import { Protocol } from '@pancakeswap/farms'
 
 const StyledBox = styled(Box)`
   background: ${({ theme }) => theme.colors.backgroundPage};
@@ -37,6 +39,8 @@ const CreateLiquidityPage = () => {
             <CreateLiquidityV3Form />
           ) : protocolName === 'v2' ? (
             <CreateLiquidityV2Form />
+          ) : protocolName === Protocol.STABLENG ? (
+            <CreateStableSwapForm />
           ) : null}
         </Box>
       </PageLayout>

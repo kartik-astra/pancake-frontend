@@ -7,6 +7,7 @@ import { useTranslation } from '@pancakeswap/localization'
 import { LightGreyCard, NextLinkFromReactRouter } from '@pancakeswap/widgets-internal'
 import { useActiveChainId } from 'hooks/useActiveChainId'
 import { getChainName } from '@pancakeswap/chains'
+import { Protocol } from '@pancakeswap/farms'
 import { BreadcrumbNav } from './components/BreadcrumbNav'
 
 const StyledBox = styled(Box)`
@@ -66,6 +67,32 @@ function InfinityCard({ disabled }: { disabled?: boolean }) {
         <Text small>
           {t(
             'Supports multiple pool types with gas-efficient design, hooks, and flexible liquidity options. Ideal for advanced strategies and maximizing returns.',
+          )}
+        </Text>
+      </Box>
+      <Box>
+        <ArrowForwardIcon width="24px" height="24px" className="arrow-icon" />
+      </Box>
+    </StyledCard>
+  )
+}
+
+function StableSwapCard({ disabled }: { disabled?: boolean }) {
+  const { t } = useTranslation()
+
+  return (
+    <StyledCard
+      mt="16px"
+      title={disabled ? t('StableSwap Pools are not supported on this chain') : undefined}
+      $disabled={disabled}
+    >
+      <Box>
+        <Text fontSize="20px" color="secondary" bold>
+          {t('StableSwap Pool')}
+        </Text>
+        <Text small>
+          {t(
+            'Pools optimized for stable assets, offering minimal price impact and steady fees for correlated token pairs.',
           )}
         </Text>
       </Box>
@@ -144,6 +171,10 @@ export const CreateLiquiditySelector = () => {
                     <ArrowForwardIcon width="24px" height="24px" className="arrow-icon" />
                   </Box>
                 </StyledCard>
+              </NextLinkFromReactRouter>
+
+              <NextLinkFromReactRouter to={`/liquidity/create/${chainName}/${Protocol.STABLENG}`}>
+                <StableSwapCard />
               </NextLinkFromReactRouter>
             </CardBody>
           </Card>
