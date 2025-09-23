@@ -1,21 +1,8 @@
 import { useTranslation } from '@pancakeswap/localization'
-import {
-  AtomBox,
-  CloseIcon,
-  FlexGap,
-  Grid,
-  Heading,
-  IconButton,
-  RowBetween,
-  Text,
-  Toggle,
-  useMatchBreakpoints,
-} from '@pancakeswap/uikit'
-import { useAtomValue } from 'jotai'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { AtomBox, CloseIcon, Grid, Heading, IconButton, RowBetween, useMatchBreakpoints } from '@pancakeswap/uikit'
+import { useCallback, useMemo, useState } from 'react'
+import { useSelectedWallet, useWalletFilter } from 'src/state/hooks'
 import { ASSET_CDN } from '../../config/url'
-import { errorEvmAtom, errorSolanaAtom } from '../../state/atom'
-import { useSelectedWallet, useWalletFilter } from '../../state/hooks'
 import { ConnectData, WalletAdaptedNetwork, WalletConfigV3, WalletIds } from '../../types'
 import { PreviewSection, PreviewStatus } from '../PreviewSection'
 import SocialLogin from '../SocialLogin'
@@ -77,7 +64,7 @@ export const ModalContent: React.FC<ModalContentProps> = ({
         if (evmOnly && !w.networks.includes(WalletAdaptedNetwork.EVM)) return false
         return w.installed !== false || (!w.installed && (w.guide || w.downloadLink || w.qrCode))
       }) ?? [],
-    [walletFilter, wallets_],
+    [walletFilter, wallets_, evmOnly, solanaOnly],
   )
 
   const topWallets: WalletConfigV3[] = useMemo(
@@ -87,7 +74,7 @@ export const ModalContent: React.FC<ModalContentProps> = ({
         if (evmOnly && !w.networks.includes(WalletAdaptedNetwork.EVM)) return false
         return !('install' in w) || w.installed !== false || (!w.installed && (w.guide || w.downloadLink || w.qrCode))
       }) ?? [],
-    [walletFilter, topWallets_],
+    [walletFilter, topWallets_, solanaOnly, evmOnly],
   )
 
   const previouslyUsedWallets = useMemo(
