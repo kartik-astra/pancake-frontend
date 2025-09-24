@@ -13,6 +13,7 @@ import {
   goerliTestnetTokens,
   lineaTestnetTokens,
   lineaTokens,
+  monadTokens,
   monadTestnetTokens,
   opBnbTestnetTokens,
   opBnbTokens,
@@ -45,6 +46,7 @@ export const usdGasTokensByChain = {
   [ChainId.SEPOLIA]: [sepoliaTokens.usdc],
   [ChainId.ARBITRUM_SEPOLIA]: [arbSepoliaTokens.usdc],
   [ChainId.BASE_SEPOLIA]: [baseSepoliaTokens.usdc],
+  [ChainId.MONAD_MAINNET]: [monadTokens.usdc],
   [ChainId.MONAD_TESTNET]: [monadTestnetTokens.usdc],
 } satisfies Record<ChainId, Token[]>
 
