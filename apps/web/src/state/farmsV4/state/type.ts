@@ -72,7 +72,7 @@ export type StablePoolInfo = BasePoolInfo & {
   token1: Currency
 }
 
-export type InfinityPoolInfo = InfinityBinPoolInfo | InfinityCLPoolInfo
+export type InfinityPoolInfo = InfinityBinPoolInfo | InfinityCLPoolInfo | StableNGPoolInfo
 
 type InfinityAdditionalPoolInfo = {
   /** @deprecated use poolId instead */
@@ -97,6 +97,13 @@ export type InfinityCLPoolInfo = Prettify<
   BasePoolInfo &
     InfinityAdditionalPoolInfo & {
       protocol: Protocol.InfinityCLAMM
+    }
+>
+
+export type StableNGPoolInfo = Prettify<
+  BasePoolInfo &
+    InfinityAdditionalPoolInfo & {
+      protocol: Protocol.STABLENG
     }
 >
 
