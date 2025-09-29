@@ -30,6 +30,7 @@ export interface FarmQuery {
   symbols?: string[]
   tokens?: string[]
   page?: number
+  abort?: boolean
 }
 
 function getPoolId(farm: UniversalFarmConfig) {

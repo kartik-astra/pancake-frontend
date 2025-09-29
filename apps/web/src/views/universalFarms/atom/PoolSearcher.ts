@@ -70,9 +70,15 @@ export class PoolSearcher extends Emitter<PoolSearchEvent> {
   private tokensMap: Record<string, TokenInfo> = {}
 
   private checkQuery(query: FarmQuery) {
-    const newHash = getHashKey({ ...query, page: 0 })
+    const newHash = getHashKey({ ...query, page: 0, abort: false })
     const queryUpdated = this.currentHash !== newHash
     const pageUpdated = this.currentQuery?.page !== query.page
+
+    // Set abort flag on the previous query if a new search is starting
+    if (this.currentQuery && queryUpdated) {
+      console.log(`[farm] abort`, this.currentQuery.chains)
+      this.currentQuery.abort = true
+    }
 
     this.currentQuery = query
     this.currentHash = newHash
@@ -85,7 +91,10 @@ export class PoolSearcher extends Emitter<PoolSearchEvent> {
   private clearStates() {
     this.all = []
     this.aprs = {}
-    this.emit(PoolSearchEvent.POOLS_UPDATED, [])
+    // Check if current query is aborted before emitting
+    if (!this.currentQuery?.abort) {
+      this.emit(PoolSearchEvent.POOLS_UPDATED, [])
+    }
   }
 
   public async search(query: FarmQuery, tokensMap: Record<string, TokenInfo>, useShowTestnet: boolean = false) {
@@ -124,10 +133,16 @@ export class PoolSearcher extends Emitter<PoolSearchEvent> {
       this.enrichAndSortPools(poolInfos, query)
 
       this.updateAprs(poolInfos).then(() => {
-        this.enrichAndSortPools(poolInfos, query)
+        // Check if query is aborted before enriching and sorting
+        if (!query.abort) {
+          this.enrichAndSortPools(poolInfos, query)
+        }
       })
     } finally {
-      this.setState(PoolSearcherState.IDLE)
+      // Check if query is aborted before setting state
+      if (!query.abort) {
+        this.setState(PoolSearcherState.IDLE)
+      }
     }
   }
 
@@ -145,7 +160,10 @@ export class PoolSearcher extends Emitter<PoolSearchEvent> {
 
   private setState(state: PoolSearcherState) {
     this.state = state
-    this.emit(PoolSearchEvent.STATE_UPDATED, state)
+    // Check if current query is aborted before emitting state update
+    if (!this.currentQuery?.abort) {
+      this.emit(PoolSearchEvent.STATE_UPDATED, state)
+    }
   }
 
   private async updateAprs(poolInfos: PoolInfo[]) {
@@ -189,6 +207,11 @@ export class PoolSearcher extends Emitter<PoolSearchEvent> {
   }
 
   private enrichAndSortPools(poolInfos: PoolInfo[], query: FarmQuery) {
+    // Check if query is aborted before processing
+    if (this.currentQuery?.abort) {
+      return
+    }
+
     // Enrich pools with APR data
     const pools = poolInfos.map((poolInfo) => {
       const { farm, ...others } = poolInfo
@@ -209,7 +232,11 @@ export class PoolSearcher extends Emitter<PoolSearchEvent> {
     })
 
     const result = farmFilters.sortFunction(pools, query.sortBy!, query.activeChainId, query.sortOrder)
-    this.emit(PoolSearchEvent.POOLS_UPDATED, result)
+
+    // Check again before emitting in case query was aborted during processing
+    if (!this.currentQuery?.abort) {
+      this.emit(PoolSearchEvent.POOLS_UPDATED, result)
+    }
   }
 
   private async fetch(query: FarmQuery, useShowTestnet: boolean = false): Promise<FarmInfo[]> {
