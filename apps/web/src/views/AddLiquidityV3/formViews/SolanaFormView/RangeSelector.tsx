@@ -45,7 +45,7 @@ const PercentageLabel = styled.div`
   color: ${({ theme }) => theme.colors.textSubtle};
 `
 
-const ButtonsContainer = styled(FlexGap).attrs({ gap: '8px' })`
+const ButtonsContainer = styled(FlexGap)`
   background-color: ${({ theme }) => theme.colors.input};
   border: 1px solid ${({ theme }) => theme.colors.inputSecondary};
   border-radius: ${({ theme }) => theme.radii.default};
@@ -59,6 +59,7 @@ const QuickActionButton = styled(Button).attrs(({ $isActive }) => ({
   $isActive?: boolean
 }>`
   height: 56px;
+  padding: 0;
   font-size: 16px;
   font-weight: ${({ $isActive }) => ($isActive ? 600 : 400)};
 `
@@ -267,7 +268,7 @@ export const RangeSelector = ({
       </FlexGap>
 
       {/* Quick Action Buttons with Simple Validation */}
-      <ButtonsContainer width="100%" justifyContent="space-between">
+      <ButtonsContainer width="100%" justifyContent="space-between" gap={isSmallScreen ? '0px' : '8px'}>
         {quickActionConfigs &&
           Object.entries(quickActionConfigs)
             ?.sort(([a], [b]) => +a - +b)
