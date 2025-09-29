@@ -95,6 +95,7 @@ export class PoolSearcher extends Emitter<PoolSearchEvent> {
     if (!this.currentQuery?.abort) {
       this.emit(PoolSearchEvent.POOLS_UPDATED, [])
     }
+    this.setState(PoolSearcherState.IDLE)
   }
 
   public async search(query: FarmQuery, tokensMap: Record<string, TokenInfo>, useShowTestnet: boolean = false) {
@@ -106,18 +107,20 @@ export class PoolSearcher extends Emitter<PoolSearchEvent> {
     if (!queryUpdated && this.state === PoolSearcherState.SEARCHING) {
       return
     }
-    this.setState(PoolSearcherState.SEARCHING)
 
     try {
       const page = query.page || 0
       if (queryUpdated) {
         this.clearStates()
+        await wait(100)
+        this.setState(PoolSearcherState.SEARCHING)
         await this.updatePools(query, useShowTestnet)
       } else {
         const total = this.all.slice(0, 20 * (query.page || 0 + 1))
         if (total.length === this.all.length) {
           return
         }
+        this.setState(PoolSearcherState.SEARCHING)
       }
 
       // Step 1: Paging - slice by page (20 items per page)
@@ -320,4 +323,8 @@ export class PoolSearcher extends Emitter<PoolSearchEvent> {
 
     return results
   }
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
