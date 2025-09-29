@@ -1,5 +1,12 @@
 # @pancakeswap/farms
 
+## 1.3.1
+
+### Patch Changes
+
+- 346eb9a: Added merklSupportedChainId define
+  - @pancakeswap/price-api-sdk@11.1.2
+
 ## 1.3.0
 
 ### Minor Changes

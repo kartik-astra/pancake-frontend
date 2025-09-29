@@ -1,5 +1,11 @@
 # @pancakeswap/multicall
 
+## 3.7.5
+
+### Patch Changes
+
+- 9f8255b: Add Perf. Stats in returns of multicall
+
 ## 3.7.4
 
 ### Patch Changes
