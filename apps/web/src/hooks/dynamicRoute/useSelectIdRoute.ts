@@ -1,21 +1,21 @@
 import { chainNames, getChainName } from '@pancakeswap/chains'
 import { Protocol } from '@pancakeswap/farms'
 import { INFINITY_SUPPORTED_CHAINS } from '@pancakeswap/infinity-sdk'
-import { Native } from '@pancakeswap/sdk'
 import { CAKE, USDC } from '@pancakeswap/tokens'
 import { SelectIdRoute, zSelectId } from 'dynamicRoute'
 import { useActiveChainId } from 'hooks/useActiveChainId'
-import useNativeCurrency from 'hooks/useNativeCurrency'
+import { useUnifiedNativeCurrency } from 'hooks/useNativeCurrency'
 import { useRouteParams } from 'next-typesafe-url/pages'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo } from 'react'
+import { getUnifiedNativeCurrency } from 'utils/getUnifiedNativeCurrency'
 import { isSupportedProtocol } from 'utils/protocols'
 import { z } from 'zod'
 
 export const useSelectIdRoute = () => {
   const router = useRouter()
   const { chainId: activeChainId } = useActiveChainId()
-  const native = useNativeCurrency(activeChainId)
+  const native = useUnifiedNativeCurrency(activeChainId)
 
   const { data: routeParams, error: routeError, isLoading } = useRouteParams(SelectIdRoute.routeParams)
 
@@ -34,13 +34,12 @@ export const useSelectIdRoute = () => {
             'v3'
       ) as 'infinity' | 'v3' | 'v2' | 'stable'
     )
-  }, [activeChainId, router.query])
+  }, [activeChainId, router.query, protocolFromQuery])
 
   const replaceWithDefaultRoute = useCallback(() => {
     if (!activeChainId || !router.isReady) return
 
     const chainName = getChainName(activeChainId)
-    console.debug('debug chainName', { chainName, activeChainId })
 
     const currencyA = native.symbol
     const currencyB: string = CAKE[activeChainId]?.address ?? USDC[activeChainId]?.address ?? ''
@@ -99,15 +98,15 @@ export const useSelectIdRouteParams = () => {
             ...router.query,
             selectId: hasOnlyChainId
               ? [
-                  p.chainId!,
+                  getChainName(p.chainId!),
                   params.protocol,
-                  params.protocol !== 'stableSwap' ? Native.onChain(p.chainId!).symbol : params.currencyIdA,
+                  params.protocol !== 'stableSwap' ? getUnifiedNativeCurrency(p.chainId!).symbol : params.currencyIdA,
                   params.protocol !== 'stableSwap'
                     ? CAKE[p.chainId!]?.address ?? USDC[p.chainId!]?.address ?? params.currencyIdB
                     : params.currencyIdB,
                 ]
               : [
-                  p.chainId ?? params.chainId,
+                  getChainName(p.chainId ?? params.chainId),
                   p.protocol ?? params.protocol,
                   p.currencyIdA ?? params.currencyIdA,
                   p.currencyIdB ?? params.currencyIdB,

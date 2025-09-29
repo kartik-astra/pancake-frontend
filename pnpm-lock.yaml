@@ -1580,6 +1580,9 @@ importers:
       '@pancakeswap/smart-router':
         specifier: workspace:*
         version: link:../../packages/smart-router
+      '@pancakeswap/solana-clmm-sdk':
+        specifier: workspace:*
+        version: link:../../packages/solana-clmm-sdk
       '@pancakeswap/solana-core-sdk':
         specifier: workspace:*
         version: link:../../packages/solana-core-sdk
@@ -1751,6 +1754,9 @@ importers:
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
+      decimal.js:
+        specifier: ^10.4.2
+        version: 10.4.3
       easymde:
         specifier: 2.16.1
         version: 2.16.1
@@ -3448,9 +3454,15 @@ importers:
 
   packages/swap-sdk-core:
     dependencies:
+      '@solana/web3.js':
+        specifier: 1.98.4
+        version: 1.98.4(bufferutil@4.0.8)(encoding@0.1.13)(typescript@5.7.3)(utf-8-validate@5.0.10)
       big.js:
         specifier: ^5.2.2
         version: 5.2.2
+      bn.js:
+        specifier: 5.2.1
+        version: 5.2.1
       decimal.js-light:
         specifier: ^2.5.0
         version: 2.5.1
@@ -3467,6 +3479,9 @@ importers:
       '@types/big.js':
         specifier: ^4.0.5
         version: 4.0.5
+      '@types/bn.js':
+        specifier: 5.2.0
+        version: 5.2.0
       tsup:
         specifier: ^6.7.0
         version: 6.7.0(postcss@8.5.3)(ts-node@10.9.1(@types/node@22.16.0)(typescript@5.7.3))(typescript@5.7.3)

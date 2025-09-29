@@ -13,6 +13,7 @@ export const useTokenListPrepared = (urls: string[]) => {
     if (isReady) {
       await Promise.allSettled(urls.map((url) => fetchList(url)))
       setFlag(Loadable.Just(true))
+      console.log(`[farm] list loaded`)
     }
   }, [urls, isReady])
 
