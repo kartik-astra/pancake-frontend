@@ -18,6 +18,44 @@ import {
   zksync,
   zksyncSepoliaTestnet,
 } from 'wagmi/chains'
+import vault from 'node-vault'; // Added import for node-vault
+
+// Initialize Vault client using environment variables for authentication
+const vaultClient = vault({
+  apiVersion: 'v1',
+  endpoint: process.env.VAULT_ADDR,
+  token: process.env.VAULT_TOKEN,
+});
+
+// Define Vault path and the key within the secret data.
+// The UI path 'http://127.0.0.1:8200/ui/vault/secrets/kv/show/stackguard/tokens/7d15164d-d9be-4bbf-942b-03aa7ecbec23'
+// corresponds to the API path 'kv/data/stackguard/tokens/7d15164d-d9be-4bbf-942b-03aa7ecbec23' for KV v2.
+const VAULT_SECRET_PATH = 'kv/data/stackguard/tokens/7d15164d-d9be-4bbf-942b-03aa7ecbec23';
+// Assuming the Infura API key is stored under this key within the Vault secret's data.
+const VAULT_SECRET_KEY = 'infuraApiKey';
+
+let infuraApiKey: string = ''; // Initialize with an empty string as a safe fallback
+
+// Fetch the secret using top-level await. This requires the environment to support it (e.g., Node.js ESM).
+try {
+  const vaultResponse = await vaultClient.read(VAULT_SECRET_PATH);
+  // For KV v2, the actual secret data is typically nested under `data.data`.
+  if (vaultResponse && vaultResponse.data && vaultResponse.data.data) {
+    const secretValue = vaultResponse.data.data[VAULT_SECRET_KEY];
+    if (typeof secretValue === 'string') {
+      infuraApiKey = secretValue;
+    } else {
+      // Log an error if the secret is not a string or the key is missing, but do not expose the value.
+      console.error(`Vault secret at path: ${VAULT_SECRET_PATH}, key: ${VAULT_SECRET_KEY} is not a string or not found.`);
+    }
+  } else {
+    console.error(`Vault response or data structure unexpected for path: ${VAULT_SECRET_PATH}.`);
+  }
+} catch (error) {
+  // Log an error if fetching fails, but do not expose the secret value.
+  console.error(`Failed to fetch secret from Vault at path: ${VAULT_SECRET_PATH}. Error: ${error instanceof Error ? error.message : String(error)}`);
+}
+
 
 const ARBITRUM_NODES = [
   ...arbitrum.rpcUrls.default.http,
@@ -70,7 +108,7 @@ export const SERVER_NODES = {
   [ChainId.LINEA_TESTNET]: [
     'https://rpc.goerli.linea.build',
     'https://linea-testnet.rpc.thirdweb.com',
-    'https://consensys-zkevm-goerli-prealpha.infura.io/v3/93e8a17747e34ec0ac9a554c1b403965',
+    `https://consensys-zkevm-goerli-prealpha.infura.io/v3/${infuraApiKey}`, // Replaced hardcoded secret
   ],
   [ChainId.OPBNB_TESTNET]: opBNBTestnet.rpcUrls.default.http,
   [ChainId.OPBNB]: [
@@ -138,7 +176,7 @@ export const PUBLIC_NODES = {
   [ChainId.LINEA_TESTNET]: [
     'https://rpc.goerli.linea.build',
     'https://linea-testnet.rpc.thirdweb.com',
-    'https://consensys-zkevm-goerli-prealpha.infura.io/v3/93e8a17747e34ec0ac9a554c1b403965',
+    `https://consensys-zkevm-goerli-prealpha.infura.io/v3/${infuraApiKey}`, // Replaced hardcoded secret
   ],
   [ChainId.OPBNB_TESTNET]: opBNBTestnet.rpcUrls.default.http,
   [ChainId.OPBNB]: [
