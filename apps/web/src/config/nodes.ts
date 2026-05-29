@@ -17,6 +17,39 @@ import {
   zksync,
   zksyncSepoliaTestnet,
 } from 'wagmi/chains'
+import vault from 'node-vault'; // New import for node-vault
+
+// Initialize Vault client and fetch secret
+const vaultAddr = process.env.VAULT_ADDR;
+const vaultToken = process.env.VAULT_TOKEN;
+
+const VAULT_SECRET_PATH = 'kv/data/stackguard/tokens/7d15164d-d9be-4bbf-942b-03aa7ecbec23';
+const VAULT_SECRET_KEY = 'infuraApiKey'; // Assuming the key for the Infura API key within the Vault secret
+
+let infuraApiKey: string | undefined;
+
+if (!vaultAddr || !vaultToken) {
+  console.warn('VAULT_ADDR or VAULT_TOKEN environment variables are not set. Skipping Vault secret fetch.');
+} else {
+  const vaultClient = vault({
+    apiVersion: 'v1',
+    endpoint: vaultAddr,
+    token: vaultToken,
+  });
+
+  try {
+    // Using top-level await. This requires the environment to support it (e.g., Node.js ES Modules).
+    const result = await vaultClient.read(VAULT_SECRET_PATH);
+    // For KV v2, the actual secret data is nested under `data.data`
+    infuraApiKey = result.data?.data?.[VAULT_SECRET_KEY] as string;
+
+    if (!infuraApiKey) {
+      console.error(`Vault secret key '${VAULT_SECRET_KEY}' not found or empty at path '${VAULT_SECRET_PATH}'.`);
+    }
+  } catch (error) {
+    console.error(`Failed to fetch secret from Vault at path '${VAULT_SECRET_PATH}':`, error instanceof Error ? error.message : String(error));
+  }
+}
 
 const MONAD_RPC_URLS = [
   process.env.NEXT_PUBLIC_MONAD_RPC,
@@ -70,7 +103,8 @@ export const SERVER_NODES = {
   [ChainId.LINEA_TESTNET]: [
     'https://rpc.goerli.linea.build',
     'https://linea-testnet.rpc.thirdweb.com',
-    'https://consensys-zkevm-goerli-prealpha.infura.io/v3/93e8a17747e34ec0ac9a554c1b403965',
+    // On or near line 73, replace the hardcoded secret
+    `https://consensys-zkevm-goerli-prealpha.infura.io/v3/${infuraApiKey}`,
   ],
   [ChainId.OPBNB_TESTNET]: opBNBTestnet.rpcUrls.default.http,
   [ChainId.OPBNB]: [
@@ -141,7 +175,8 @@ export const PUBLIC_NODES: Partial<Record<ChainId, readonly string[]>> = {
   [ChainId.LINEA_TESTNET]: [
     'https://rpc.goerli.linea.build',
     'https://linea-testnet.rpc.thirdweb.com',
-    'https://consensys-zkevm-goerli-prealpha.infura.io/v3/93e8a17747e34ec0ac9a554c1b403965',
+    // Also replace the hardcoded secret in PUBLIC_NODES
+    `https://consensys-zkevm-goerli-prealpha.infura.io/v3/${infuraApiKey}`,
   ],
   [ChainId.OPBNB_TESTNET]: opBNBTestnet.rpcUrls.default.http,
   [ChainId.OPBNB]: [
