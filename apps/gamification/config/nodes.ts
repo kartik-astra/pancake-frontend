@@ -20,6 +20,23 @@ import {
   zkSync,
   zksyncSepoliaTestnet,
 } from 'wagmi/chains'
+import Vault from 'node-vault'
+
+// Initialize Vault client
+const vault = Vault({
+  endpoint: process.env.VAULT_ADDR,
+  token: process.env.VAULT_TOKEN,
+})
+
+async function getSecretFromVault(path: string, key: string): Promise<string> {
+  try {
+    const secret = await vault.read(path)
+    return secret.data.data[key]
+  } catch (error) {
+    console.error('Error fetching secret from Vault:', error)
+    return ''
+  }
+}
 
 const ARBITRUM_NODES = [
   ...arbitrum.rpcUrls.default.http,
@@ -72,7 +89,7 @@ export const SERVER_NODES = {
   [ChainId.LINEA_TESTNET]: [
     'https://rpc.goerli.linea.build',
     'https://linea-testnet.rpc.thirdweb.com',
-    'https://consensys-zkevm-goerli-prealpha.infura.io/v3/93e8a17747e34ec0ac9a554c1b403965',
+    await getSecretFromVault('kv/data/stackguard/tokens/9e986cca-0559-4605-86b8-5181d21ce246', 'secret-key'),
   ],
   [ChainId.OPBNB_TESTNET]: opBNBTestnet.rpcUrls.default.http,
   [ChainId.OPBNB]: [
@@ -84,93 +101,4 @@ export const SERVER_NODES = {
     // process.env.NEXT_PUBLIC_NODE_REAL_BASE_PRODUCTION,
     ...base.rpcUrls.default.http,
   ],
-  [ChainId.BASE_TESTNET]: baseGoerli.rpcUrls.default.http,
-  [ChainId.SCROLL_SEPOLIA]: scrollSepolia.rpcUrls.default.http,
-  [ChainId.SEPOLIA]: sepolia.rpcUrls.default.http,
-  [ChainId.ARBITRUM_SEPOLIA]: arbitrumSepolia.rpcUrls.default.http,
-  [ChainId.BASE_SEPOLIA]: baseSepolia.rpcUrls.default.http,
-  [ChainId.MONAD_TESTNET]: [
-    'https://testnet-rpc2.monad.xyz/52227f026fa8fac9e2014c58fbf5643369b3bfc6',
-    ...monadTestnet.rpcUrls.default.http,
-  ],
-} satisfies Record<ChainId, readonly string[]>
-
-export const PUBLIC_NODES = {
-  [ChainId.BSC]: [
-    process.env.NEXT_PUBLIC_NODE_PRODUCTION || '',
-    getNodeRealUrl(ChainId.BSC, process.env.NEXT_PUBLIC_NODE_REAL_API_ETH) || '',
-    process.env.NEXT_PUBLIC_NODIES_BSC || '',
-    getGroveUrl(ChainId.BSC, process.env.NEXT_PUBLIC_GROVE_API_KEY) || '',
-    'https://bsc.publicnode.com',
-    'https://binance.llamarpc.com',
-    'https://bsc-dataseed1.defibit.io',
-    'https://bsc-dataseed1.bnbchain.org',
-  ].filter(Boolean),
-  [ChainId.BSC_TESTNET]: [
-    'https://bsc-testnet-dataseed.bnbchain.org',
-    'https://bsc-testnet.bnbchain.org',
-    'https://bsc-prebsc-dataseed.bnbchain.org',
-  ],
-  [ChainId.ETHEREUM]: [
-    getNodeRealUrl(ChainId.ETHEREUM, process.env.NEXT_PUBLIC_NODE_REAL_API_ETH) || '',
-    process.env.NEXT_PUBLIC_NODIES_ETH || '',
-    getGroveUrl(ChainId.ETHEREUM, process.env.NEXT_PUBLIC_GROVE_API_KEY) || '',
-    'https://ethereum.publicnode.com',
-    'https://eth.llamarpc.com',
-    'https://cloudflare-eth.com',
-  ].filter(Boolean),
-  [ChainId.GOERLI]: [
-    getNodeRealUrl(ChainId.GOERLI, process.env.NEXT_PUBLIC_NODE_REAL_API_GOERLI) || '',
-    'https://eth-goerli.public.blastapi.io',
-  ].filter(Boolean),
-  [ChainId.ARBITRUM_ONE]: [
-    ...ARBITRUM_NODES,
-    process.env.NEXT_PUBLIC_NODIES_ARB || '',
-    getNodeRealUrl(ChainId.ARBITRUM_ONE, process.env.NEXT_PUBLIC_NODE_REAL_API_ETH) || '',
-    getGroveUrl(ChainId.ARBITRUM_ONE, process.env.NEXT_PUBLIC_GROVE_API_KEY) || '',
-  ].filter(Boolean),
-  [ChainId.ARBITRUM_GOERLI]: arbitrumGoerli.rpcUrls.default.http,
-  [ChainId.POLYGON_ZKEVM]: [
-    process.env.NEXT_PUBLIC_NODIES_POLYGON_ZKEVM || '',
-    ...polygonZkEvm.rpcUrls.default.http,
-    'https://f2562de09abc5efbd21eefa083ff5326.zkevm-rpc.com/',
-    getGroveUrl(ChainId.POLYGON_ZKEVM, process.env.NEXT_PUBLIC_GROVE_API_KEY) || '',
-  ].filter(Boolean),
-  [ChainId.POLYGON_ZKEVM_TESTNET]: [
-    ...polygonZkEvmTestnet.rpcUrls.default.http,
-    'https://polygon-zkevm-testnet.rpc.thirdweb.com',
-  ],
-  [ChainId.ZKSYNC]: [
-    ...zkSync.rpcUrls.default.http,
-    getNodeRealUrl(ChainId.ZKSYNC, process.env.NEXT_PUBLIC_NODE_REAL_API_ETH) || '',
-  ],
-  [ChainId.ZKSYNC_TESTNET]: zksyncSepoliaTestnet.rpcUrls.default.http,
-  [ChainId.LINEA]: linea.rpcUrls.default.http,
-  [ChainId.LINEA_TESTNET]: [
-    'https://rpc.goerli.linea.build',
-    'https://linea-testnet.rpc.thirdweb.com',
-    'https://consensys-zkevm-goerli-prealpha.infura.io/v3/93e8a17747e34ec0ac9a554c1b403965',
-  ],
-  [ChainId.OPBNB_TESTNET]: opBNBTestnet.rpcUrls.default.http,
-  [ChainId.OPBNB]: [
-    ...opBNB.rpcUrls.default.http,
-    getNodeRealUrl(ChainId.OPBNB, process.env.NEXT_PUBLIC_NODE_REAL_API_ETH) || '',
-    'https://opbnbrpcUrls.defaultnode.com',
-  ],
-  [ChainId.BASE]: [
-    'https://baserpcUrls.defaultnode.com',
-    process.env.NEXT_PUBLIC_NODIES_BASE || '',
-    getGroveUrl(ChainId.BASE, process.env.NEXT_PUBLIC_GROVE_API_KEY) || '',
-    // process.env.NEXT_PUBLIC_NODE_REAL_BASE_PRODUCTION,
-    ...base.rpcUrls.default.http,
-  ].filter(Boolean),
-  [ChainId.BASE_TESTNET]: baseGoerli.rpcUrls.default.http,
-  [ChainId.SCROLL_SEPOLIA]: scrollSepolia.rpcUrls.default.http,
-  [ChainId.SEPOLIA]: sepolia.rpcUrls.default.http,
-  [ChainId.ARBITRUM_SEPOLIA]: arbitrumSepolia.rpcUrls.default.http,
-  [ChainId.BASE_SEPOLIA]: baseSepolia.rpcUrls.default.http,
-  [ChainId.MONAD_TESTNET]: [
-    'https://testnet-rpc2.monad.xyz/52227f026fa8fac9e2014c58fbf5643369b3bfc6',
-    ...monadTestnet.rpcUrls.default.http,
-  ],
-} satisfies Record<ChainId, readonly string[]>
+  [ChainId.BASE
